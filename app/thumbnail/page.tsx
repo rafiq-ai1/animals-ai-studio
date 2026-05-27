@@ -46,9 +46,6 @@ export default function ThumbnailPage() {
   const [backgroundImage, setBackgroundImage] = useState(
     "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80"
   );
-  const [animalImage, setAnimalImage] = useState(
-    "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80"
-  );
   const [fontFamily, setFontFamily] = useState(FONT_OPTIONS[0]);
   const [textColor, setTextColor] = useState("#ffffff");
   const [status, setStatus] = useState("Preview is ready.");
@@ -178,41 +175,12 @@ export default function ThumbnailPage() {
       ctx.fillStyle = "rgba(255,255,255,0.85)";
       ctx.font = "400 18px Arial, Helvetica, sans-serif";
       ctx.fillText("Generated with Animals AI Studio", 130, 460);
-
-      try {
-        const animal = new Image();
-        animal.crossOrigin = "anonymous";
-        animal.src = animalImage || "";
-
-        await new Promise<void>((resolve) => {
-          animal.onload = () => resolve();
-          animal.onerror = () => resolve();
-        });
-
-        if (animal.complete && animal.naturalWidth > 0) {
-          const imageX = width - 420;
-          const imageY = 130;
-          const imageW = 300;
-          const imageH = 220;
-
-          ctx.save();
-          ctx.shadowColor = "rgba(15, 23, 42, 0.35)";
-          ctx.shadowBlur = 18;
-          ctx.beginPath();
-          ctx.roundRect(imageX, imageY, imageW, imageH, 24);
-          ctx.clip();
-          ctx.drawImage(animal, imageX, imageY, imageW, imageH);
-          ctx.restore();
-        }
-      } catch {
-        // Ignore animal image load failures.
-      }
     };
 
     renderThumbnail().catch(() => {
       setStatus("Something went wrong while rendering the preview.");
     });
-  }, [animalImage, backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, subtitle, textColor, title]);
+  }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, subtitle, textColor, title]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -358,14 +326,6 @@ export default function ThumbnailPage() {
 
             <label style={fieldLabel}>Text color</label>
             <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={colorInputStyle} />
-
-            <label style={fieldLabel}>Animal image URL</label>
-            <input
-              value={animalImage}
-              onChange={(e) => setAnimalImage(e.target.value)}
-              style={inputStyle}
-              placeholder="https://example.com/animal.jpg"
-            />
 
             <label style={fieldLabel}>Font style</label>
             <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={inputStyle}>

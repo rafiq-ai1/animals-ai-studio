@@ -50,9 +50,8 @@ export default function ThumbnailPage() {
   const [textColor, setTextColor] = useState("#ffffff");
   const [status, setStatus] = useState("Preview is ready.");
 
-  const previewLabel = useMemo(() => {
-    return title.trim() ? title : "Your thumbnail title";
-  }, [title]);
+  const previewLabel = useMemo(() => title.trim(), [title]);
+  const previewSubtitle = useMemo(() => subtitle.trim(), [subtitle]);
 
   useEffect(() => {
     if (!generatedImage) return;
@@ -78,13 +77,15 @@ export default function ThumbnailPage() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      canvas.width = 1280;
-      canvas.height = 720;
+      canvas.width = 1600;
+      canvas.height = 900;
 
       const width = canvas.width;
       const height = canvas.height;
 
       ctx.clearRect(0, 0, width, height);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
       if (generatedImage) {
         try {
@@ -134,12 +135,12 @@ export default function ThumbnailPage() {
       }
 
       const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, "rgba(2, 6, 23, 0.05)");
-      gradient.addColorStop(1, "rgba(2, 6, 23, 0.78)");
+      gradient.addColorStop(0, "rgba(2, 6, 23, 0.08)");
+      gradient.addColorStop(1, "rgba(2, 6, 23, 0.28)");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
-      ctx.fillStyle = "rgba(15, 23, 42, 0.35)";
+      ctx.fillStyle = "rgba(15, 23, 42, 0.18)";
       ctx.fillRect(0, 0, width, height);
 
       ctx.save();
@@ -163,7 +164,7 @@ export default function ThumbnailPage() {
 
       ctx.fillStyle = "rgba(226, 232, 240, 0.95)";
       ctx.font = `400 28px ${fontFamily}`;
-      const lines = wrapText(ctx, subtitle, width - 260);
+      const lines = wrapText(ctx, previewSubtitle, width - 260);
       lines.forEach((line, index) => {
         ctx.fillText(line, 130, 320 + index * 38, width - 260);
       });
@@ -352,7 +353,7 @@ export default function ThumbnailPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
               <h2 style={{ fontSize: 18, margin: 0 }}>Live Preview</h2>
               <span style={{ color: "#fbbf24", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.18em" }}>
-                1280 × 720
+                1600 × 900
               </span>
             </div>
 

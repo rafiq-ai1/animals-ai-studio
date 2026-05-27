@@ -48,10 +48,40 @@ export default function ThumbnailPage() {
   );
   const [fontFamily, setFontFamily] = useState(FONT_OPTIONS[0]);
   const [textColor, setTextColor] = useState("#ffffff");
+  const [titlePosition, setTitlePosition] = useState<"top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right">("middle-left");
+  const [titleTextColor, setTitleTextColor] = useState("#ffffff");
+  const [titleFontSize, setTitleFontSize] = useState("medium");
   const [status, setStatus] = useState("Preview is ready.");
 
   const previewLabel = useMemo(() => title.trim(), [title]);
   const previewSubtitle = useMemo(() => subtitle.trim(), [subtitle]);
+
+  const getTextPosition = (pos: string, width: number, height: number, fontSize: number) => {
+    const padding = 130;
+    const fontSizeNum = fontSize;
+    const midY = height / 2 - fontSizeNum / 2;
+    
+    const positions: { [key: string]: { x: number; y: number; align: "left" | "center" | "right" } } = {
+      "top-left": { x: padding, y: padding + 80, align: "left" },
+      "top-center": { x: width / 2, y: padding + 80, align: "center" },
+      "top-right": { x: width - padding, y: padding + 80, align: "right" },
+      "middle-left": { x: padding, y: midY, align: "left" },
+      "center": { x: width / 2, y: midY, align: "center" },
+      "middle-right": { x: width - padding, y: midY, align: "right" },
+      "bottom-left": { x: padding, y: height - padding - 40, align: "left" },
+      "bottom-center": { x: width / 2, y: height - padding - 40, align: "center" },
+      "bottom-right": { x: width - padding, y: height - padding - 40, align: "right" },
+    };
+    return positions[pos] || positions["middle-left"];
+  };
+
+  const getFontSizeValue = (size: string) => {
+    switch (size) {
+      case "small": return 48;
+      case "large": return 80;
+      default: return 64;
+    }
+  };
 
   useEffect(() => {
     if (!generatedImage) return;
@@ -133,25 +163,37 @@ export default function ThumbnailPage() {
         ctx.fillRect(0, 0, width, height);
       }
 
-      ctx.fillStyle = textColor;
-      ctx.shadowColor = "rgba(15, 23, 42, 0.45)";
-      ctx.shadowBlur = 18;
+      const fontSize = getFontSizeValue(titleFontSize);
+      const posData = getTextPosition(titlePosition, width, height, fontSize);
+
+      ctx.fillStyle = titleTextColor;
+      ctx.shadowColor = "rgba(15, 23, 42, 0.5)";
+      ctx.shadowBlur = 20;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 4;
-      ctx.font = `700 64px ${fontFamily}`;
-      ctx.textAlign = "left";
-      ctx.fillText(previewLabel, 130, 235, width - 260);
+      ctx.font = `700 ${fontSize}px ${fontFamily}`;
+      ctx.textAlign = posData.align;
+
+      const textMetrics = ctx.measureText(previewLabel);
+      const textHeight = fontSize;
+      const padding = 16;
+      const bgX = posData.align === "center" ? posData.x - textMetrics.width / 2 - padding : (posData.align === "right" ? posData.x - textMetrics.width - padding : posData.x - padding);
+      const bgY = posData.y - textHeight + 8;
+      const bgWidth = textMetrics.width + padding * 2;
+      const bgHeight = textHeight + padding;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
+      ctx.beginPath();
+      ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 12);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.fillText(previewLabel, posData.x, posData.y);
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
-
-      ctx.fillStyle = "rgba(226, 232, 240, 0.98)";
-      ctx.font = `400 30px ${fontFamily}`;
-      const lines = wrapText(ctx, previewSubtitle, width - 320);
-      lines.forEach((line, index) => {
-        ctx.fillText(line, 130, 310 + index * 42, width - 320);
-      });
-    }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, previewLabel, previewSubtitle, textColor]);
+    }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, previewLabel, previewSubtitle, titlePosition, titleTextColor, titleFontSize]);
 
   useEffect(() => {
     renderThumbnail().catch(() => {
@@ -305,6 +347,38 @@ export default function ThumbnailPage() {
 
             <label style={fieldLabel}>Text color</label>
             <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={colorInputStyle} />
+
+            <label style={fieldLabel}>Title Text Position</label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 12 }}>
+              {["top-left", "top-center", "top-right", "middle-left", "center", "middle-right", "bottom-left", "bottom-center", "bottom-right"].map((pos) => (
+                <button
+                  key={pos}
+                  onClick={() => setTitlePosition(pos as any)}
+                  style={{
+                    padding: "10px 8px",
+                    borderRadius: 8,
+                    border: titlePosition === pos ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
+                    background: titlePosition === pos ? "rgba(251, 191, 36, 0.2)" : "rgba(15, 23, 42, 0.9)",
+                    color: "#eff6ff",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    fontWeight: titlePosition === pos ? 700 : 400,
+                  }}
+                >
+                  {pos.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                </button>
+              ))}
+            </div>
+
+            <label style={fieldLabel}>Title Text Color</label>
+            <input type="color" value={titleTextColor} onChange={(e) => setTitleTextColor(e.target.value)} style={colorInputStyle} />
+
+            <label style={fieldLabel}>Title Font Size</label>
+            <select value={titleFontSize} onChange={(e) => setTitleFontSize(e.target.value)} style={inputStyle}>
+              <option value="small">Small (48px)</option>
+              <option value="medium">Medium (64px)</option>
+              <option value="large">Large (80px)</option>
+            </select>
 
             <label style={fieldLabel}>Font style</label>
             <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={inputStyle}>

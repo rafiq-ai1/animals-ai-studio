@@ -12,6 +12,19 @@ const FONT_OPTIONS = [
   "Impact, Charcoal, sans-serif",
 ];
 
+const CATEGORY_OPTIONS = [
+  "Animals",
+  "People",
+  "Nature",
+  "Fantasy",
+  "Sports",
+  "Food",
+  "Technology",
+  "Abstract",
+];
+
+const STYLE_OPTIONS = ["Cinematic", "Anime", "Realistic", "Digital Art", "Watercolor", "Oil Painting", "Neon"];
+
 const GRADIENT_PRESETS = {
   "blue-purple": { start: "#2563eb", end: "#7c3aed" },
   "orange-red": { start: "#fb7185", end: "#f97316" },
@@ -22,6 +35,11 @@ export default function ThumbnailPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [title, setTitle] = useState("Wildlife Adventure");
   const [subtitle, setSubtitle] = useState("Epic animals, cinematic scenes, and AI-ready visuals.");
+  const [prompt, setPrompt] = useState("A majestic lion under a golden sunset with dramatic clouds");
+  const [category, setCategory] = useState("Animals");
+  const [style, setStyle] = useState("Cinematic");
+  const [generatedImage, setGeneratedImage] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
   const [backgroundMode, setBackgroundMode] = useState<"color" | "gradient" | "image">("color");
   const [backgroundColor, setBackgroundColor] = useState("#0f172a");
   const [gradientPreset, setGradientPreset] = useState<keyof typeof GRADIENT_PRESETS>("blue-purple");
@@ -55,7 +73,24 @@ export default function ThumbnailPage() {
 
       ctx.clearRect(0, 0, width, height);
 
-      if (backgroundMode === "image") {
+      if (generatedImage) {
+        try {
+          const image = new Image();
+          image.crossOrigin = "anonymous";
+          image.src = generatedImage;
+
+          await new Promise<void>((resolve) => {
+            image.onload = () => resolve();
+            image.onerror = () => resolve();
+          });
+
+          if (image.complete && image.naturalWidth > 0) {
+            ctx.drawImage(image, 0, 0, width, height);
+          }
+        } catch {
+          // Ignore generated image failures and fall back to selected background.
+        }
+      } else if (backgroundMode === "image") {
         try {
           const image = new Image();
           image.crossOrigin = "anonymous";
@@ -161,7 +196,33 @@ export default function ThumbnailPage() {
     renderThumbnail().catch(() => {
       setStatus("Something went wrong while rendering the preview.");
     });
-  }, [animalImage, backgroundColor, backgroundImage, backgroundMode, fontFamily, gradientPreset, subtitle, textColor, title]);
+  }, [animalImage, backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, subtitle, textColor, title]);
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setStatus("Generating thumbnail with Hugging Face...");
+
+    try {
+      const response = await fetch("/api/thumbnail-generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, category, style }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to generate thumbnail image.");
+      }
+
+      setGeneratedImage(data.image);
+      setStatus("Thumbnail generated successfully. Preview updated.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Unable to generate thumbnail.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -212,6 +273,32 @@ export default function ThumbnailPage() {
               boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
             }}
           >
+            <label style={fieldLabel}>Prompt</label>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              style={{ ...inputStyle, minHeight: 110, resize: "vertical" }}
+              placeholder="Example: A majestic lion under a golden sunset with dramatic clouds"
+            />
+
+            <label style={fieldLabel}>Category</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle}>
+              {CATEGORY_OPTIONS.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+
+            <label style={fieldLabel}>Style</label>
+            <select value={style} onChange={(e) => setStyle(e.target.value)} style={inputStyle}>
+              {STYLE_OPTIONS.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+
+            <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.75 : 1 }}>
+              {isGenerating ? "Generating..." : "Generate Thumbnail"}
+            </button>
+
             <label style={fieldLabel}>Title</label>
             <input
               value={title}
@@ -312,6 +399,17 @@ export default function ThumbnailPage() {
                 marginTop: 14,
               }}
             />
+
+            {generatedImage && (
+              <div style={{ marginTop: 14 }}>
+                <h3 style={{ fontSize: 14, marginBottom: 8, color: "#bfdbfe" }}>Generated Image</h3>
+                <img
+                  src={generatedImage}
+                  alt="Generated thumbnail"
+                  style={{ width: "100%", borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.18)" }}
+                />
+              </div>
+            )}
           </section>
         </div>
       </div>

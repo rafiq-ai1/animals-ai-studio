@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const FONT_OPTIONS = [
   "Arial, Helvetica, sans-serif",
@@ -69,8 +69,7 @@ export default function ThumbnailPage() {
     image.src = generatedImage;
   }, [generatedImage]);
 
-  useEffect(() => {
-    const renderThumbnail = async () => {
+  const renderThumbnail = useCallback(async () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
@@ -135,12 +134,12 @@ export default function ThumbnailPage() {
       }
 
       const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, "rgba(2, 6, 23, 0.08)");
-      gradient.addColorStop(1, "rgba(2, 6, 23, 0.28)");
+      gradient.addColorStop(0, "rgba(2, 6, 23, 0.03)");
+      gradient.addColorStop(1, "rgba(2, 6, 23, 0.14)");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
-      ctx.fillStyle = "rgba(15, 23, 42, 0.18)";
+      ctx.fillStyle = "rgba(15, 23, 42, 0.08)";
       ctx.fillRect(0, 0, width, height);
 
       ctx.save();
@@ -155,33 +154,26 @@ export default function ThumbnailPage() {
       ctx.shadowBlur = 18;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 4;
-      ctx.font = `700 62px ${fontFamily}`;
+      ctx.font = `700 64px ${fontFamily}`;
       ctx.textAlign = "left";
-      ctx.fillText(previewLabel, 130, 240, width - 260);
+      ctx.fillText(previewLabel, 130, 235, width - 260);
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      ctx.fillStyle = "rgba(226, 232, 240, 0.95)";
-      ctx.font = `400 28px ${fontFamily}`;
-      const lines = wrapText(ctx, previewSubtitle, width - 260);
+      ctx.fillStyle = "rgba(226, 232, 240, 0.98)";
+      ctx.font = `400 30px ${fontFamily}`;
+      const lines = wrapText(ctx, previewSubtitle, width - 320);
       lines.forEach((line, index) => {
-        ctx.fillText(line, 130, 320 + index * 38, width - 260);
+        ctx.fillText(line, 130, 310 + index * 42, width - 320);
       });
+    }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, previewLabel, previewSubtitle, textColor]);
 
-      ctx.fillStyle = "rgba(251, 191, 36, 0.95)";
-      ctx.font = "600 22px Arial, Helvetica, sans-serif";
-      ctx.fillText("AI THUMBNAIL", 130, 420);
-
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      ctx.font = "400 18px Arial, Helvetica, sans-serif";
-      ctx.fillText("Generated with Animals AI Studio", 130, 460);
-    };
-
+  useEffect(() => {
     renderThumbnail().catch(() => {
       setStatus("Something went wrong while rendering the preview.");
     });
-  }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, subtitle, textColor, title]);
+  }, [renderThumbnail]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -200,7 +192,9 @@ export default function ThumbnailPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    await renderThumbnail();
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 

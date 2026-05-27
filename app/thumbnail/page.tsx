@@ -133,22 +133,6 @@ export default function ThumbnailPage() {
         ctx.fillRect(0, 0, width, height);
       }
 
-      const gradient = ctx.createLinearGradient(0, 0, 0, height);
-      gradient.addColorStop(0, "rgba(2, 6, 23, 0.03)");
-      gradient.addColorStop(1, "rgba(2, 6, 23, 0.14)");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = "rgba(15, 23, 42, 0.08)";
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(80, 80, width - 160, height - 160, 36);
-      ctx.fillStyle = "rgba(15, 23, 42, 0.55)";
-      ctx.fill();
-      ctx.restore();
-
       ctx.fillStyle = textColor;
       ctx.shadowColor = "rgba(15, 23, 42, 0.45)";
       ctx.shadowBlur = 18;
@@ -182,7 +166,7 @@ export default function ThumbnailPage() {
     try {
       const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, 16:9, vibrant, centered subject`;
       const encodedPrompt = encodeURIComponent(combinedPrompt);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&model=flux&enhance=true&nologo=true`;
 
       setGeneratedImage(imageUrl);
       setStatus("Loading generated image into the thumbnail preview...");

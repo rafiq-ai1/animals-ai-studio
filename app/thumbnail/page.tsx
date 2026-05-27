@@ -48,7 +48,7 @@ export default function ThumbnailPage() {
   );
   const [fontFamily, setFontFamily] = useState(FONT_OPTIONS[0]);
   const [textColor, setTextColor] = useState("#ffffff");
-  const [titlePosition, setTitlePosition] = useState<"top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right">("middle-left");
+  const [titlePosition, setTitlePosition] = useState<"top-left" | "top-center" | "top-right" | "middle-left" | "center" | "middle-right" | "bottom-left" | "bottom-center" | "bottom-right">("top-left");
   const [titleTextColor, setTitleTextColor] = useState("#ffffff");
   const [titleFontSize, setTitleFontSize] = useState("medium");
   const [status, setStatus] = useState("Preview is ready.");
@@ -57,22 +57,23 @@ export default function ThumbnailPage() {
   const previewSubtitle = useMemo(() => subtitle.trim(), [subtitle]);
 
   const getTextPosition = (pos: string, width: number, height: number, fontSize: number) => {
-    const padding = 130;
-    const fontSizeNum = fontSize;
-    const midY = height / 2 - fontSizeNum / 2;
+    const padding = 80;
+    const topY = padding + fontSize;
+    const bottomY = height - padding;
+    const centerY = height / 2 + fontSize / 3;
     
     const positions: { [key: string]: { x: number; y: number; align: "left" | "center" | "right" } } = {
-      "top-left": { x: padding, y: padding + 80, align: "left" },
-      "top-center": { x: width / 2, y: padding + 80, align: "center" },
-      "top-right": { x: width - padding, y: padding + 80, align: "right" },
-      "middle-left": { x: padding, y: midY, align: "left" },
-      "center": { x: width / 2, y: midY, align: "center" },
-      "middle-right": { x: width - padding, y: midY, align: "right" },
-      "bottom-left": { x: padding, y: height - padding - 40, align: "left" },
-      "bottom-center": { x: width / 2, y: height - padding - 40, align: "center" },
-      "bottom-right": { x: width - padding, y: height - padding - 40, align: "right" },
+      "top-left": { x: padding, y: topY, align: "left" },
+      "top-center": { x: width / 2, y: topY, align: "center" },
+      "top-right": { x: width - padding, y: topY, align: "right" },
+      "middle-left": { x: padding, y: centerY, align: "left" },
+      "center": { x: width / 2, y: centerY, align: "center" },
+      "middle-right": { x: width - padding, y: centerY, align: "right" },
+      "bottom-left": { x: padding, y: bottomY, align: "left" },
+      "bottom-center": { x: width / 2, y: bottomY, align: "center" },
+      "bottom-right": { x: width - padding, y: bottomY, align: "right" },
     };
-    return positions[pos] || positions["middle-left"];
+    return positions[pos] || positions["top-left"];
   };
 
   const getFontSizeValue = (size: string) => {
@@ -167,20 +168,24 @@ export default function ThumbnailPage() {
       const posData = getTextPosition(titlePosition, width, height, fontSize);
 
       ctx.fillStyle = titleTextColor;
-      ctx.shadowColor = "rgba(15, 23, 42, 0.5)";
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 4;
       ctx.font = `700 ${fontSize}px ${fontFamily}`;
       ctx.textAlign = posData.align;
 
       const textMetrics = ctx.measureText(previewLabel);
-      const textHeight = fontSize;
-      const padding = 16;
-      const bgX = posData.align === "center" ? posData.x - textMetrics.width / 2 - padding : (posData.align === "right" ? posData.x - textMetrics.width - padding : posData.x - padding);
-      const bgY = posData.y - textHeight + 8;
+      const padding = 12;
+      
+      let bgX = 0;
+      if (posData.align === "center") {
+        bgX = posData.x - textMetrics.width / 2 - padding;
+      } else if (posData.align === "right") {
+        bgX = posData.x - textMetrics.width - padding;
+      } else {
+        bgX = posData.x - padding;
+      }
+      
+      const bgY = posData.y - fontSize * 0.85;
       const bgWidth = textMetrics.width + padding * 2;
-      const bgHeight = textHeight + padding;
+      const bgHeight = fontSize * 1.1;
 
       ctx.save();
       ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
@@ -189,6 +194,10 @@ export default function ThumbnailPage() {
       ctx.fill();
       ctx.restore();
 
+      ctx.shadowColor = "rgba(15, 23, 42, 0.5)";
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 4;
       ctx.fillText(previewLabel, posData.x, posData.y);
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;

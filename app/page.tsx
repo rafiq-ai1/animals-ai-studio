@@ -123,20 +123,36 @@ export default function Home() {
       />
 
       {/* BUTTON */}
-      <button
-        onClick={generateVideo}
-        style={{
-          marginTop: "20px",
-          padding: "14px 24px",
-          background: "#ffcc00",
-          border: "none",
-          cursor: "pointer",
-          fontWeight: "bold",
-          borderRadius: "10px",
-        }}
-      >
-        Generate AI Content
-      </button>
+      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "20px" }}>
+        <button
+          onClick={generateVideo}
+          style={{
+            padding: "14px 24px",
+            background: "#ffcc00",
+            border: "none",
+            cursor: "pointer",
+            fontWeight: "bold",
+            borderRadius: "10px",
+          }}
+        >
+          Generate AI Content
+        </button>
+
+        <a
+          href="/thumbnail"
+          style={{
+            padding: "14px 24px",
+            background: "#111",
+            color: "#fff",
+            border: "1px solid #333",
+            borderRadius: "10px",
+            textDecoration: "none",
+            fontWeight: "bold",
+          }}
+        >
+          Open Thumbnail Generator
+        </a>
+      </div>
 
       {/* LOADING */}
       {loading && (

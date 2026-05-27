@@ -58,6 +58,22 @@ export default function ThumbnailPage() {
   }, [title]);
 
   useEffect(() => {
+    if (!generatedImage) return;
+
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      setStatus("Generated image loaded. Preview is ready.");
+      setIsGenerating(false);
+    };
+    image.onerror = () => {
+      setStatus("Generated image failed to load. Try another prompt.");
+      setIsGenerating(false);
+    };
+    image.src = generatedImage;
+  }, [generatedImage]);
+
+  useEffect(() => {
     const renderThumbnail = async () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -208,10 +224,9 @@ export default function ThumbnailPage() {
       const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true`;
 
       setGeneratedImage(imageUrl);
-      setStatus("Thumbnail image URL generated. Preview updated.");
+      setStatus("Loading generated image into the thumbnail preview...");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to generate thumbnail.");
-    } finally {
       setIsGenerating(false);
     }
   };
@@ -287,7 +302,8 @@ export default function ThumbnailPage() {
               ))}
             </select>
 
-            <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.75 : 1 }}>
+            <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.8 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+              {isGenerating && <span style={spinnerStyle} />}
               {isGenerating ? "Generating..." : "Generate Thumbnail"}
             </button>
 
@@ -466,4 +482,13 @@ const primaryButton = {
   fontSize: 15,
   cursor: "pointer",
   marginTop: 6,
+};
+
+const spinnerStyle = {
+  width: 14,
+  height: 14,
+  borderRadius: "50%",
+  border: "2px solid rgba(17, 24, 39, 0.3)",
+  borderTopColor: "#111827",
+  animation: "spin 0.8s linear infinite",
 };

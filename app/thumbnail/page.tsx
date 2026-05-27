@@ -200,23 +200,15 @@ export default function ThumbnailPage() {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    setStatus("Generating thumbnail with Hugging Face...");
+    setStatus("Generating thumbnail with Pollinations AI...");
 
     try {
-      const response = await fetch("/api/thumbnail-generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, category, style }),
-      });
+      const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, 16:9, vibrant, centered subject`;
+      const encodedPrompt = encodeURIComponent(combinedPrompt);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true`;
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || "Failed to generate thumbnail image.");
-      }
-
-      setGeneratedImage(data.image);
-      setStatus("Thumbnail generated successfully. Preview updated.");
+      setGeneratedImage(imageUrl);
+      setStatus("Thumbnail image URL generated. Preview updated.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Unable to generate thumbnail.");
     } finally {

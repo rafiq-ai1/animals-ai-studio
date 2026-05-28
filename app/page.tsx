@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Navigation from "./components/Navigation";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -55,149 +57,172 @@ export default function Home() {
   };
 
   return (
-    <main
-      style={{
-        background: "#050505",
-        color: "white",
-        minHeight: "100vh",
-        padding: "40px",
-        fontFamily: "Arial",
-      }}
-    >
-      <h1 style={{ fontSize: "42px" }}>
-        Animals of Our Earth
-      </h1>
-
-      <p style={{ color: "#aaa" }}>
-        AI Wildlife Video & Thumbnail Studio
-      </p>
-
-      {/* QUICK BUTTONS */}
-      <div
+    <>
+      <Navigation />
+      <main
         style={{
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-          marginTop: "20px",
-          marginBottom: "20px",
+          background: "linear-gradient(135deg, #020617 0%, #111827 45%, #0f172a 100%)",
+          color: "#eff6ff",
+          minHeight: "100vh",
+          padding: "60px 24px",
+          fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
-        {[
-          "Snow Leopard",
-          "Eagle",
-          "Mountain Goat",
-          "Wolf",
-        ].map((item) => (
-          <button
-            key={item}
-            onClick={() => setPrompt(item)}
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <h1 style={{ fontSize: "clamp(40px, 8vw, 56px)", fontWeight: 700, marginBottom: 8 }}>
+            Welcome to Animals AI Studio
+          </h1>
+
+          <p style={{ color: "#cbd5e1", fontSize: 18, marginBottom: 32, maxWidth: 600, lineHeight: 1.6 }}>
+            Create stunning AI-generated thumbnails and videos with our powerful tools. Perfect for content creators, marketers, and studios.
+          </p>
+
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 48 }}>
+            <Link href="/thumbnail" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  padding: "16px 40px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                  color: "#111827",
+                  border: "none",
+                  borderRadius: 12,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 8px 24px rgba(251, 191, 36, 0.3)",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 12px 32px rgba(251, 191, 36, 0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(251, 191, 36, 0.3)";
+                }}
+              >
+                Launch Thumbnail Generator →
+              </button>
+            </Link>
+
+            <button
+              onClick={generateVideo}
+              style={{
+                padding: "16px 40px",
+                background: "rgba(15, 23, 42, 0.8)",
+                color: "#fbbf24",
+                border: "2px solid #fbbf24",
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 700,
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(251, 191, 36, 0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(15, 23, 42, 0.8)";
+              }}
+            >
+              Generate Videos
+            </button>
+          </div>
+
+          <div
             style={{
-              padding: "10px",
-              background: "#111",
-              color: "#fff",
-              border: "1px solid #333",
-              borderRadius: "8px",
-              cursor: "pointer",
+              background: "rgba(15, 23, 42, 0.88)",
+              border: "1px solid rgba(148, 163, 184, 0.18)",
+              borderRadius: 18,
+              padding: 32,
+              boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
             }}
           >
-            {item}
-          </button>
-        ))}
-      </div>
+            <h2 style={{ fontSize: 20, marginBottom: 20 }}>Quick Demo - Generate a Video</h2>
 
-      {/* PROMPT */}
-      <textarea
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Describe your cinematic wildlife scene..."
-        style={{
-          width: "100%",
-          height: "160px",
-          padding: "15px",
-          background: "#111",
-          color: "#fff",
-          border: "1px solid #333",
-          borderRadius: "10px",
-          fontSize: "16px",
-        }}
-      />
+            {/* QUICK BUTTONS */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                marginBottom: "20px",
+              }}
+            >
+              {[
+                "Snow Leopard",
+                "Eagle",
+                "Mountain Goat",
+                "Wolf",
+              ].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setPrompt(item)}
+                  style={{
+                    padding: "10px 16px",
+                    background: "#111",
+                    color: "#fff",
+                    border: "1px solid #333",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
 
-      {/* BUTTON */}
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "20px" }}>
-        <button
-          onClick={generateVideo}
-          style={{
-            padding: "14px 24px",
-            background: "#ffcc00",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: "bold",
-            borderRadius: "10px",
-          }}
-        >
-          Generate AI Content
-        </button>
+            {/* PROMPT */}
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe your cinematic wildlife scene..."
+              style={{
+                width: "100%",
+                height: "160px",
+                padding: "15px",
+                background: "rgba(15, 23, 42, 0.9)",
+                color: "#fff",
+                border: "1px solid rgba(148, 163, 184, 0.25)",
+                borderRadius: "10px",
+                fontSize: "16px",
+              }}
+            />
 
-        <a
-          href="/thumbnail"
-          style={{
-            padding: "14px 24px",
-            background: "#111",
-            color: "#fff",
-            border: "1px solid #333",
-            borderRadius: "10px",
-            textDecoration: "none",
-            fontWeight: "bold",
-          }}
-        >
-          Open Thumbnail Generator
-        </a>
-      </div>
+            {/* BUTTON */}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "20px" }}>
+              <button
+                onClick={generateVideo}
+                style={{
+                  padding: "12px 24px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                  color: "#111827",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  borderRadius: "10px",
+                }}
+              >
+                {loading ? "Generating..." : "Generate AI Content"}
+              </button>
+            </div>
+          </div>
 
-      {/* LOADING */}
-      {loading && (
-        <p
-          style={{
-            marginTop: "20px",
-            color: "#ffcc00",
-          }}
-        >
-          Generating cinematic wildlife content...
-        </p>
-      )}
+          {image && (
+            <div style={{ marginTop: 32 }}>
+              <img src={image} alt="Generated" style={{ maxWidth: "100%", borderRadius: 12 }} />
+            </div>
+          )}
 
-      {/* IMAGE */}
-      {image && (
-        <div style={{ marginTop: "40px" }}>
-          <h2>AI Thumbnail Preview</h2>
-
-          <img
-            src={image}
-            alt="Wildlife"
-            style={{
-              width: "100%",
-              borderRadius: "12px",
-              marginTop: "10px",
-            }}
-          />
+          {video && (
+            <div style={{ marginTop: 32 }}>
+              <video controls style={{ width: "100%", borderRadius: 12 }}>
+                <source src={video} type="video/mp4" />
+              </video>
+            </div>
+          )}
         </div>
-      )}
-
-      <div
-  style={{
-    marginTop: "40px",
-    padding: "20px",
-    background: "#111",
-    borderRadius: "12px",
-    border: "1px solid #333",
-  }}
->
-  <h2>AI Video Generation</h2>
-
-  <p style={{ color: "#aaa" }}>
-    Real cinematic AI wildlife video generation coming soon...
-  </p>
-</div>
-    </main>
+      </main>
+    </>
   );
 }

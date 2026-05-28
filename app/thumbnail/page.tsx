@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Navigation from "../components/Navigation";
 
 const FONT_OPTIONS = [
   "Arial, Helvetica, sans-serif",
@@ -241,17 +242,68 @@ export default function ThumbnailPage() {
     setStatus("PNG download started.");
   };
 
+  const fieldLabel = {
+    display: "block",
+    color: "#bfdbfe",
+    fontSize: 13,
+    marginBottom: 6,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.14em",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    borderRadius: 12,
+    border: "1px solid rgba(148, 163, 184, 0.25)",
+    background: "rgba(15, 23, 42, 0.9)",
+    color: "#eff6ff",
+    padding: "12px 14px",
+    fontSize: 15,
+    marginBottom: 12,
+    boxSizing: "border-box" as const,
+  };
+
+  const colorInputStyle = {
+    ...inputStyle,
+    padding: "6px",
+    height: 42,
+  };
+
+  const primaryButton = {
+    width: "100%",
+    borderRadius: 12,
+    border: "none",
+    background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+    color: "#111827",
+    padding: "12px 14px",
+    fontWeight: 700,
+    fontSize: 15,
+    cursor: "pointer",
+    marginTop: 6,
+  };
+
+  const spinnerStyle = {
+    width: 14,
+    height: 14,
+    borderRadius: "50%",
+    border: "2px solid rgba(17, 24, 39, 0.3)",
+    borderTopColor: "#111827",
+    animation: "spin 0.8s linear infinite",
+  };
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #020617 0%, #111827 45%, #0f172a 100%)",
-        color: "#eff6ff",
-        padding: "32px 18px 56px",
-        fontFamily: "Arial, Helvetica, sans-serif",
-      }}
-    >
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+    <>
+      <Navigation />
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #020617 0%, #111827 45%, #0f172a 100%)",
+          color: "#eff6ff",
+          padding: "32px 18px 56px",
+          fontFamily: "Arial, Helvetica, sans-serif",
+        }}
+      >
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <p style={{ color: "#fbbf24", letterSpacing: "0.18em", textTransform: "uppercase", fontSize: 13 }}>
           Thumbnail Generator
         </p>
@@ -443,75 +495,9 @@ export default function ThumbnailPage() {
             )}
           </section>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let currentLine = "";
-
-  words.forEach((word) => {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    if (ctx.measureText(testLine).width > maxWidth) {
-      if (currentLine) lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = testLine;
-    }
-  });
-
-  if (currentLine) lines.push(currentLine);
-  return lines;
-}
-
-const fieldLabel = {
-  display: "block",
-  color: "#bfdbfe",
-  fontSize: 13,
-  marginBottom: 6,
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.14em",
-};
-
-const inputStyle = {
-  width: "100%",
-  borderRadius: 12,
-  border: "1px solid rgba(148, 163, 184, 0.25)",
-  background: "rgba(15, 23, 42, 0.9)",
-  color: "#eff6ff",
-  padding: "12px 14px",
-  fontSize: 15,
-  marginBottom: 12,
-  boxSizing: "border-box" as const,
-};
-
-const colorInputStyle = {
-  ...inputStyle,
-  padding: "6px",
-  height: 42,
-};
-
-const primaryButton = {
-  width: "100%",
-  borderRadius: 12,
-  border: "none",
-  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-  color: "#111827",
-  padding: "12px 14px",
-  fontWeight: 700,
-  fontSize: 15,
-  cursor: "pointer",
-  marginTop: 6,
-};
-
-const spinnerStyle = {
-  width: 14,
-  height: 14,
-  borderRadius: "50%",
-  border: "2px solid rgba(17, 24, 39, 0.3)",
-  borderTopColor: "#111827",
-  animation: "spin 0.8s linear infinite",
-};

@@ -217,7 +217,8 @@ export default function ThumbnailPage() {
     try {
       const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, 16:9, vibrant, centered subject`;
       const encodedPrompt = encodeURIComponent(combinedPrompt);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&model=flux&enhance=true&nologo=true`;
+      const negativePrompt = encodeURIComponent("text, words, letters, numbers, watermark, signature, caption, font, typography");
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&model=flux&enhance=true&nologo=true&negative_prompt=${negativePrompt}`;
 
       setGeneratedImage(imageUrl);
       setStatus("Loading generated image into the thumbnail preview...");

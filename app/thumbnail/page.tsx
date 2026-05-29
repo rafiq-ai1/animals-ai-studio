@@ -14,17 +14,32 @@ const FONT_OPTIONS = [
 ];
 
 const CATEGORY_OPTIONS = [
-  "Animals",
-  "People",
-  "Nature",
-  "Fantasy",
-  "Sports",
-  "Food",
-  "Technology",
-  "Abstract",
+  { emoji: "🐾", label: "Animals" },
+  { emoji: "🌿", label: "Nature" },
+  { emoji: "👤", label: "People" },
+  { emoji: "⚔️", label: "War & Action" },
+  { emoji: "🏆", label: "Sports" },
+  { emoji: "🎮", label: "Gaming" },
+  { emoji: "🍕", label: "Food" },
+  { emoji: "🏙️", label: "City" },
+  { emoji: "🚀", label: "Space" },
+  { emoji: "🎨", label: "Abstract" },
 ];
 
-const STYLE_OPTIONS = ["Cinematic", "Anime", "Realistic", "Digital Art", "Watercolor", "Oil Painting", "Neon"];
+const STYLE_OPTIONS = [
+  "Cinematic",
+  "Realistic",
+  "Anime",
+  "Digital Art",
+  "Watercolor",
+  "Neon",
+];
+
+const ASPECT_RATIO_OPTIONS = [
+  { ratio: "16:9", width: 1600, height: 900, label: "YouTube" },
+  { ratio: "1:1", width: 1080, height: 1080, label: "Instagram" },
+  { ratio: "9:16", width: 1080, height: 1920, label: "TikTok/Shorts" },
+];
 
 const GRADIENT_PRESETS = {
   "blue-purple": { start: "#2563eb", end: "#7c3aed" },
@@ -39,6 +54,7 @@ export default function ThumbnailPage() {
   const [prompt, setPrompt] = useState("A majestic lion under a golden sunset with dramatic clouds");
   const [category, setCategory] = useState("Animals");
   const [style, setStyle] = useState("Cinematic");
+  const [aspectRatio, setAspectRatio] = useState<"16:9" | "1:1" | "9:16">("16:9");
   const [generatedImage, setGeneratedImage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [backgroundMode, setBackgroundMode] = useState<"color" | "gradient" | "image">("color");
@@ -56,6 +72,8 @@ export default function ThumbnailPage() {
 
   const previewLabel = useMemo(() => title.trim(), [title]);
   const previewSubtitle = useMemo(() => subtitle.trim(), [subtitle]);
+
+  const currentAspectRatio = ASPECT_RATIO_OPTIONS.find(a => a.ratio === aspectRatio) || ASPECT_RATIO_OPTIONS[0];
 
   const getTextPosition = (pos: string, width: number, height: number, fontSize: number) => {
     const padding = 80;
@@ -108,11 +126,11 @@ export default function ThumbnailPage() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      canvas.width = 1600;
-      canvas.height = 900;
+      const width = currentAspectRatio.width;
+      const height = currentAspectRatio.height;
 
-      const width = canvas.width;
-      const height = canvas.height;
+      canvas.width = width;
+      canvas.height = height;
 
       ctx.clearRect(0, 0, width, height);
       ctx.imageSmoothingEnabled = true;
@@ -203,7 +221,7 @@ export default function ThumbnailPage() {
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
-    }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, previewLabel, previewSubtitle, titlePosition, titleTextColor, titleFontSize]);
+    }, [backgroundColor, backgroundImage, backgroundMode, fontFamily, generatedImage, gradientPreset, previewLabel, previewSubtitle, titlePosition, titleTextColor, titleFontSize, currentAspectRatio]);
 
   useEffect(() => {
     renderThumbnail().catch(() => {
@@ -216,10 +234,10 @@ export default function ThumbnailPage() {
     setStatus("Generating thumbnail with Pollinations AI...");
 
     try {
-      const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, 16:9, vibrant, centered subject`;
+      const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, ${aspectRatio}, vibrant, centered subject`;
       const encodedPrompt = encodeURIComponent(combinedPrompt);
       const negativePrompt = encodeURIComponent("text, words, letters, numbers, watermark, signature, caption, font, typography");
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&model=flux&enhance=true&nologo=true&negative_prompt=${negativePrompt}`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${currentAspectRatio.width}&height=${currentAspectRatio.height}&model=flux&enhance=true&nologo=true&negative_prompt=${negativePrompt}`;
 
       setGeneratedImage(imageUrl);
       setStatus("Loading generated image into the thumbnail preview...");
@@ -246,9 +264,10 @@ export default function ThumbnailPage() {
     display: "block",
     color: "#bfdbfe",
     fontSize: 13,
-    marginBottom: 6,
+    marginBottom: 8,
     textTransform: "uppercase" as const,
     letterSpacing: "0.14em",
+    fontWeight: 600,
   };
 
   const inputStyle = {
@@ -259,7 +278,7 @@ export default function ThumbnailPage() {
     color: "#eff6ff",
     padding: "12px 14px",
     fontSize: 15,
-    marginBottom: 12,
+    marginBottom: 16,
     boxSizing: "border-box" as const,
   };
 
@@ -275,11 +294,25 @@ export default function ThumbnailPage() {
     border: "none",
     background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
     color: "#111827",
-    padding: "12px 14px",
+    padding: "14px 16px",
     fontWeight: 700,
     fontSize: 15,
     cursor: "pointer",
-    marginTop: 6,
+    marginTop: 0,
+    marginBottom: 16,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  };
+
+  const secondaryButton = {
+    ...primaryButton,
+    background: "rgba(148, 163, 184, 0.2)",
+    color: "#fbbf24",
+    border: "1px solid rgba(251, 191, 36, 0.3)",
+    marginBottom: 12,
   };
 
   const spinnerStyle = {
@@ -303,198 +336,311 @@ export default function ThumbnailPage() {
           fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <p style={{ color: "#fbbf24", letterSpacing: "0.18em", textTransform: "uppercase", fontSize: 13 }}>
-          Thumbnail Generator
-        </p>
-        <h1 style={{ fontSize: "clamp(32px, 6vw, 48px)", marginTop: 8, marginBottom: 8 }}>
-          Create a polished thumbnail in seconds
-        </h1>
-        <p style={{ color: "#cbd5e1", maxWidth: 760, lineHeight: 1.6 }}>
-          Pick a title, subtitle, background color or image, and font style. The preview updates live and you can export it as a PNG immediately.
-        </p>
+        <div style={{ maxWidth: 1440, margin: "0 auto" }}>
+          <div style={{ marginBottom: 40 }}>
+            <p style={{ color: "#fbbf24", letterSpacing: "0.18em", textTransform: "uppercase", fontSize: 13 }}>
+              Thumbnail Generator
+            </p>
+            <h1 style={{ fontSize: "clamp(32px, 6vw, 48px)", marginTop: 8, marginBottom: 12 }}>
+              Create professional thumbnails in seconds
+            </h1>
+            <p style={{ color: "#cbd5e1", maxWidth: 800, lineHeight: 1.6 }}>
+              Generate AI-powered thumbnails with customizable text, colors, and styles. Choose from multiple aspect ratios and download as PNG.
+            </p>
+          </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: 24,
-            marginTop: 28,
-          }}
-        >
-          <section
+          <div
             style={{
-              background: "rgba(15, 23, 42, 0.88)",
-              border: "1px solid rgba(148, 163, 184, 0.18)",
-              borderRadius: 18,
-              padding: 18,
-              boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 32,
+              marginTop: 28,
             }}
           >
-            <label style={fieldLabel}>Prompt</label>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              style={{ ...inputStyle, minHeight: 110, resize: "vertical" }}
-              placeholder="Example: A majestic lion under a golden sunset with dramatic clouds"
-            />
-
-            <label style={fieldLabel}>Category</label>
-            <select value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle}>
-              {CATEGORY_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-
-            <label style={fieldLabel}>Style</label>
-            <select value={style} onChange={(e) => setStyle(e.target.value)} style={inputStyle}>
-              {STYLE_OPTIONS.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-
-            <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.8 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-              {isGenerating && <span style={spinnerStyle} />}
-              {isGenerating ? "Generating..." : "Generate Thumbnail"}
-            </button>
-
-            <label style={fieldLabel}>Title</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              style={inputStyle}
-              placeholder="Add a strong title"
-            />
-
-            <label style={fieldLabel}>Subtitle</label>
-            <textarea
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              style={{ ...inputStyle, minHeight: 90, resize: "vertical" }}
-              placeholder="Describe the thumbnail message"
-            />
-
-            <label style={fieldLabel}>Background mode</label>
-            <select value={backgroundMode} onChange={(e) => setBackgroundMode(e.target.value as "color" | "gradient" | "image")} style={inputStyle}>
-              <option value="color">Solid color</option>
-              <option value="gradient">Gradient</option>
-              <option value="image">Image background</option>
-            </select>
-
-            {backgroundMode === "gradient" ? (
-              <>
-                <label style={fieldLabel}>Gradient preset</label>
-                <select value={gradientPreset} onChange={(e) => setGradientPreset(e.target.value as keyof typeof GRADIENT_PRESETS)} style={inputStyle}>
-                  <option value="blue-purple">Blue to Purple</option>
-                  <option value="orange-red">Orange to Red</option>
-                  <option value="green-teal">Green to Teal</option>
-                </select>
-              </>
-            ) : backgroundMode === "color" ? (
-              <>
-                <label style={fieldLabel}>Background color</label>
-                <input type="color" value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} style={colorInputStyle} />
-              </>
-            ) : (
-              <>
-                <label style={fieldLabel}>Background image URL</label>
-                <input
-                  value={backgroundImage}
-                  onChange={(e) => setBackgroundImage(e.target.value)}
-                  style={inputStyle}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </>
-            )}
-
-            <label style={fieldLabel}>Text color</label>
-            <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={colorInputStyle} />
-
-            <label style={fieldLabel}>Title Text Position</label>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 12 }}>
-              {["top-left", "top-center", "top-right", "middle-left", "center", "middle-right", "bottom-left", "bottom-center", "bottom-right"].map((pos) => (
-                <button
-                  key={pos}
-                  onClick={() => setTitlePosition(pos as any)}
-                  style={{
-                    padding: "10px 8px",
-                    borderRadius: 8,
-                    border: titlePosition === pos ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
-                    background: titlePosition === pos ? "rgba(251, 191, 36, 0.2)" : "rgba(15, 23, 42, 0.9)",
-                    color: "#eff6ff",
-                    fontSize: 12,
-                    cursor: "pointer",
-                    fontWeight: titlePosition === pos ? 700 : 400,
-                  }}
-                >
-                  {pos.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
-                </button>
-              ))}
-            </div>
-
-            <label style={fieldLabel}>Title Text Color</label>
-            <input type="color" value={titleTextColor} onChange={(e) => setTitleTextColor(e.target.value)} style={colorInputStyle} />
-
-            <label style={fieldLabel}>Title Font Size</label>
-            <select value={titleFontSize} onChange={(e) => setTitleFontSize(e.target.value)} style={inputStyle}>
-              <option value="small">Small (48px)</option>
-              <option value="medium">Medium (64px)</option>
-              <option value="large">Large (80px)</option>
-            </select>
-
-            <label style={fieldLabel}>Font style</label>
-            <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={inputStyle}>
-              {FONT_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option.split(",")[0]}
-                </option>
-              ))}
-            </select>
-
-            <button onClick={handleDownload} style={primaryButton}>Download PNG</button>
-            <p style={{ color: "#bfdbfe", fontSize: 13, marginTop: 10 }}>{status}</p>
-          </section>
-
-          <section
-            style={{
-              background: "rgba(15, 23, 42, 0.88)",
-              border: "1px solid rgba(148, 163, 184, 0.18)",
-              borderRadius: 18,
-              padding: 18,
-              boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <h2 style={{ fontSize: 18, margin: 0 }}>Live Preview</h2>
-              <span style={{ color: "#fbbf24", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.18em" }}>
-                1600 × 900
-              </span>
-            </div>
-
-            <canvas
-              ref={canvasRef}
+            {/* Left Side - Control Panel */}
+            <div
               style={{
-                width: "100%",
-                display: "block",
-                borderRadius: 18,
-                border: "1px solid rgba(148, 163, 184, 0.18)",
-                background: "#111827",
-                marginTop: 14,
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
               }}
-            />
+            >
+              <section
+                style={{
+                  background: "rgba(15, 23, 42, 0.88)",
+                  border: "1px solid rgba(148, 163, 184, 0.18)",
+                  borderRadius: 18,
+                  padding: 24,
+                  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
+                }}
+              >
+                {/* AI Generation Section */}
+                <div style={{ marginBottom: 28 }}>
+                  <h3 style={{ fontSize: 16, marginBottom: 12, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    AI Generation
+                  </h3>
 
-            {generatedImage && (
-              <div style={{ marginTop: 14 }}>
-                <h3 style={{ fontSize: 14, marginBottom: 8, color: "#bfdbfe" }}>Generated Image</h3>
-                <img
-                  src={generatedImage}
-                  alt="Generated thumbnail"
-                  style={{ width: "100%", borderRadius: 14, border: "1px solid rgba(148, 163, 184, 0.18)" }}
+                  <label style={fieldLabel}>Prompt</label>
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    style={{ ...inputStyle, minHeight: 100, resize: "vertical", marginBottom: 16 }}
+                    placeholder="Describe what you want to see..."
+                  />
+
+                  <label style={fieldLabel}>Category</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
+                    {CATEGORY_OPTIONS.map((cat) => (
+                      <button
+                        key={cat.label}
+                        onClick={() => setCategory(cat.label)}
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          border: category === cat.label ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
+                          background: category === cat.label ? "rgba(251, 191, 36, 0.15)" : "rgba(15, 23, 42, 0.9)",
+                          color: "#eff6ff",
+                          fontSize: 13,
+                          cursor: "pointer",
+                          fontWeight: category === cat.label ? 700 : 500,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span style={{ fontSize: 16, marginRight: 6 }}>{cat.emoji}</span>
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label style={fieldLabel}>Style</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
+                    {STYLE_OPTIONS.map((styleOption) => (
+                      <button
+                        key={styleOption}
+                        onClick={() => setStyle(styleOption)}
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          border: style === styleOption ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
+                          background: style === styleOption ? "rgba(251, 191, 36, 0.15)" : "rgba(15, 23, 42, 0.9)",
+                          color: "#eff6ff",
+                          fontSize: 13,
+                          cursor: "pointer",
+                          fontWeight: style === styleOption ? 700 : 500,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        {styleOption}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label style={fieldLabel}>Aspect Ratio</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
+                    {ASPECT_RATIO_OPTIONS.map((ar) => (
+                      <button
+                        key={ar.ratio}
+                        onClick={() => setAspectRatio(ar.ratio as "16:9" | "1:1" | "9:16")}
+                        style={{
+                          padding: "10px 8px",
+                          borderRadius: 10,
+                          border: aspectRatio === ar.ratio ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
+                          background: aspectRatio === ar.ratio ? "rgba(251, 191, 36, 0.15)" : "rgba(15, 23, 42, 0.9)",
+                          color: "#eff6ff",
+                          fontSize: 13,
+                          cursor: "pointer",
+                          fontWeight: aspectRatio === ar.ratio ? 700 : 500,
+                          transition: "all 0.2s ease",
+                          textAlign: "center",
+                        }}
+                        title={ar.label}
+                      >
+                        <div style={{ fontSize: 12 }}>{ar.ratio}</div>
+                        <div style={{ fontSize: 11, color: "#bfdbfe", marginTop: 2 }}>{ar.label}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.7 : 1 }}>
+                    {isGenerating && <span style={spinnerStyle} />}
+                    {isGenerating ? "Generating..." : "Generate Thumbnail"}
+                  </button>
+                </div>
+
+                {/* Text Section */}
+                <div style={{ marginBottom: 28 }}>
+                  <h3 style={{ fontSize: 16, marginBottom: 12, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    Text Settings
+                  </h3>
+
+                  <label style={fieldLabel}>Title</label>
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    style={inputStyle}
+                    placeholder="Add your title"
+                  />
+
+                  <label style={fieldLabel}>Subtitle</label>
+                  <textarea
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                    style={{ ...inputStyle, minHeight: 80, resize: "vertical" }}
+                    placeholder="Optional subtitle (not displayed on thumbnail)"
+                  />
+
+                  <label style={fieldLabel}>Position</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: 16 }}>
+                    {["top-left", "top-center", "top-right", "middle-left", "center", "middle-right", "bottom-left", "bottom-center", "bottom-right"].map((pos) => (
+                      <button
+                        key={pos}
+                        onClick={() => setTitlePosition(pos as any)}
+                        style={{
+                          padding: "8px 6px",
+                          borderRadius: 8,
+                          border: titlePosition === pos ? "2px solid #fbbf24" : "1px solid rgba(148, 163, 184, 0.25)",
+                          background: titlePosition === pos ? "rgba(251, 191, 36, 0.2)" : "rgba(15, 23, 42, 0.9)",
+                          color: "#eff6ff",
+                          fontSize: 11,
+                          cursor: "pointer",
+                          fontWeight: titlePosition === pos ? 700 : 400,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        {pos.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label style={fieldLabel}>Font Size</label>
+                  <select value={titleFontSize} onChange={(e) => setTitleFontSize(e.target.value)} style={inputStyle}>
+                    <option value="small">Small (48px)</option>
+                    <option value="medium">Medium (64px)</option>
+                    <option value="large">Large (80px)</option>
+                  </select>
+
+                  <label style={fieldLabel}>Font Family</label>
+                  <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} style={inputStyle}>
+                    {FONT_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option.split(",")[0]}
+                      </option>
+                    ))}
+                  </select>
+
+                  <label style={fieldLabel}>Text Color</label>
+                  <input type="color" value={titleTextColor} onChange={(e) => setTitleTextColor(e.target.value)} style={colorInputStyle} />
+                </div>
+
+                {/* Background Section */}
+                <div>
+                  <h3 style={{ fontSize: 16, marginBottom: 12, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                    Background
+                  </h3>
+
+                  <label style={fieldLabel}>Mode</label>
+                  <select value={backgroundMode} onChange={(e) => setBackgroundMode(e.target.value as "color" | "gradient" | "image")} style={inputStyle}>
+                    <option value="color">Solid color</option>
+                    <option value="gradient">Gradient</option>
+                    <option value="image">Image</option>
+                  </select>
+
+                  {backgroundMode === "gradient" ? (
+                    <>
+                      <label style={fieldLabel}>Gradient Preset</label>
+                      <select value={gradientPreset} onChange={(e) => setGradientPreset(e.target.value as keyof typeof GRADIENT_PRESETS)} style={inputStyle}>
+                        <option value="blue-purple">Blue to Purple</option>
+                        <option value="orange-red">Orange to Red</option>
+                        <option value="green-teal">Green to Teal</option>
+                      </select>
+                    </>
+                  ) : backgroundMode === "color" ? (
+                    <>
+                      <label style={fieldLabel}>Color</label>
+                      <input type="color" value={backgroundColor} onChange={(e) => setBackgroundColor(e.target.value)} style={colorInputStyle} />
+                    </>
+                  ) : (
+                    <>
+                      <label style={fieldLabel}>Image URL</label>
+                      <input
+                        value={backgroundImage}
+                        onChange={(e) => setBackgroundImage(e.target.value)}
+                        style={inputStyle}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            {/* Right Side - Preview */}
+            <div
+              style={{
+                maxHeight: "calc(100vh - 200px)",
+                overflowY: "auto",
+              }}
+            >
+              <section
+                style={{
+                  background: "rgba(15, 23, 42, 0.88)",
+                  border: "1px solid rgba(148, 163, 184, 0.18)",
+                  borderRadius: 18,
+                  padding: 24,
+                  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <h2 style={{ fontSize: 18, margin: 0 }}>Live Preview</h2>
+                  <span style={{ color: "#fbbf24", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.18em" }}>
+                    {currentAspectRatio.width} × {currentAspectRatio.height}
+                  </span>
+                </div>
+
+                <canvas
+                  ref={canvasRef}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    borderRadius: 14,
+                    border: "1px solid rgba(148, 163, 184, 0.18)",
+                    background: "#111827",
+                    marginBottom: 20,
+                  }}
                 />
-              </div>
-            )}
-          </section>
-        </div>
+
+                <button onClick={handleDownload} style={primaryButton}>
+                  Download PNG
+                </button>
+
+                <p style={{ color: "#bfdbfe", fontSize: 13, marginBottom: 20, fontStyle: "italic" }}>
+                  {status}
+                </p>
+
+                {generatedImage && (
+                  <div>
+                    <h3 style={{ fontSize: 14, marginBottom: 12, color: "#bfdbfe", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                      Generated Image
+                    </h3>
+                    <img
+                      src={generatedImage}
+                      alt="Generated thumbnail"
+                      style={{
+                        width: "100%",
+                        borderRadius: 14,
+                        border: "1px solid rgba(148, 163, 184, 0.18)",
+                        marginBottom: 16,
+                      }}
+                    />
+
+                    <button onClick={handleGenerate} disabled={isGenerating} style={secondaryButton}>
+                      {isGenerating && <span style={spinnerStyle} />}
+                      {isGenerating ? "Regenerating..." : "🔄 Regenerate"}
+                    </button>
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
         </div>
       </main>
     </>

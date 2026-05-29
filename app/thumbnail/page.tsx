@@ -103,6 +103,16 @@ export default function ThumbnailPage() {
     }
   };
 
+  // Auto-update prompt when category or style changes
+  useEffect(() => {
+    // Only auto-update if user hasn't customized the prompt yet
+    if (prompt === "A majestic lion under a golden sunset with dramatic clouds") {
+      const categoryLabel = CATEGORY_OPTIONS.find(c => c.label === category)?.label || category;
+      const newPrompt = `A beautiful ${categoryLabel.toLowerCase()} scene in ${style} style, high quality, vibrant, detailed`;
+      setPrompt(newPrompt);
+    }
+  }, [category, style]);
+
   useEffect(() => {
     if (!generatedImage) return;
 
@@ -460,8 +470,20 @@ export default function ThumbnailPage() {
                     ))}
                   </div>
 
-                  <button onClick={handleGenerate} disabled={isGenerating} style={{ ...primaryButton, opacity: isGenerating ? 0.7 : 1 }}>
+                  <button 
+                    onClick={handleGenerate} 
+                    disabled={isGenerating} 
+                    style={{ 
+                      ...primaryButton, 
+                      opacity: isGenerating ? 0.7 : 1,
+                      padding: "16px 20px",
+                      fontSize: 16,
+                      fontWeight: 700,
+                      marginBottom: 16,
+                    }}
+                  >
                     {isGenerating && <span style={spinnerStyle} />}
+                    <span style={{ fontSize: 20, marginRight: 8 }}>🎨</span>
                     {isGenerating ? "Generating..." : "Generate Thumbnail"}
                   </button>
                 </div>
@@ -607,6 +629,36 @@ export default function ThumbnailPage() {
                     marginBottom: 20,
                   }}
                 />
+
+                {isGenerating && (
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "40px 20px",
+                    background: "rgba(15, 23, 42, 0.5)",
+                    borderRadius: 14,
+                    border: "1px dashed rgba(251, 191, 36, 0.3)",
+                    marginBottom: 20,
+                  }}>
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      border: "3px solid rgba(251, 191, 36, 0.2)",
+                      borderTopColor: "#fbbf24",
+                      animation: "spin 0.8s linear infinite",
+                      marginBottom: 16,
+                    }} />
+                    <p style={{ color: "#fbbf24", fontSize: 14, margin: 0, fontWeight: 600 }}>
+                      Generating your thumbnail...
+                    </p>
+                    <p style={{ color: "#cbd5e1", fontSize: 12, marginTop: 6 }}>
+                      This may take a few seconds
+                    </p>
+                  </div>
+                )}
 
                 <button onClick={handleDownload} style={primaryButton}>
                   Download PNG

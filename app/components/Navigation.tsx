@@ -50,7 +50,7 @@ export default function Navigation() {
       <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Link href="/" style={{ textDecoration: "none" }}>
           <h1 style={{ margin: 0, fontSize: "clamp(18px, 4vw, 20px)", fontWeight: 700, color: "#fbbf24", letterSpacing: "0.05em" }}>
-            AI Studio
+            Animals AI Studio
           </h1>
         </Link>
 

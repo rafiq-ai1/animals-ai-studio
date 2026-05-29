@@ -59,6 +59,7 @@ export default function Navigation() {
           <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
             {navLink("/", "Home")}
             {navLink("/thumbnail", "Thumbnail Generator")}
+            {navLink("/video", "Video Generator")}
             {navLink("/about", "About")}
           </div>
         )}
@@ -100,6 +101,7 @@ export default function Navigation() {
         >
           {navLink("/", "Home")}
           {navLink("/thumbnail", "Thumbnail Generator")}
+          {navLink("/video", "Video Generator")}
           {navLink("/about", "About")}
         </div>
       )}

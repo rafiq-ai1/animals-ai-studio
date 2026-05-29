@@ -1,49 +1,46 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
+    const { prompt, width = 1600, height = 900, negativePrompt = "" } = body;
 
-  const text = body.prompt.toLowerCase();
+    // Encode prompt for URL
+    const encodedPrompt = encodeURIComponent(prompt);
+    const encodedNegative = encodeURIComponent(negativePrompt);
 
-  let video = "";
+    // Pollinations API URL
+    const pollUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&model=flux&enhance=true&nologo=true&negative_prompt=${encodedNegative}`;
 
-  if (text.includes("snow leopard")) {
-  video =
-    video =
-  video =
-  "https://samplelib.com/lib/preview/mp4/sample-5s.mp4";
-}
+    // Fetch the image from Pollinations API (server-side, no CORS issues)
+    const response = await fetch(pollUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    });
 
-// Eagle
-else if (text.includes("eagle")) {
-  video =
-    "https://samplelib.com/lib/preview/mp4/sample-10s.mp4";
-}
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, error: "Failed to generate image from Pollinations" },
+        { status: response.status }
+      );
+    }
 
-// Goat
-else if (
-  text.includes("goat") ||
-  text.includes("mountain goat")
-) {
-  video =
-    "https://samplelib.com/lib/preview/mp4/sample-15s.mp4";
-}
+    // Get the image buffer
+    const imageBuffer = await response.arrayBuffer();
 
-// Wolf
-else if (text.includes("wolf")) {
-  video =
-    "https://samplelib.com/lib/preview/mp4/sample-20s.mp4";
-}
-
-// Default
-else {
-  video =
-    "https://samplelib.com/lib/preview/mp4/sample-5mb.mp4";
-}
-
-  return NextResponse.json({
-    success: true,
-    prompt: body.prompt,
-    video,
-  });
+    // Return the image with proper headers
+    return new NextResponse(imageBuffer, {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    console.error("Image generation error:", error);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

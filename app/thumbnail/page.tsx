@@ -245,13 +245,31 @@ export default function ThumbnailPage() {
 
     try {
       const combinedPrompt = `${prompt || "thumbnail"}, ${category || "Animals"}, ${style || "Cinematic"}, high detail, ${aspectRatio}, vibrant, centered subject`;
-      const encodedPrompt = encodeURIComponent(combinedPrompt);
-      const negativePrompt = encodeURIComponent("text, words, letters, numbers, watermark, signature, caption, font, typography");
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${currentAspectRatio.width}&height=${currentAspectRatio.height}&model=flux&enhance=true&nologo=true&negative_prompt=${negativePrompt}`;
+      const negativePrompt = "text, words, letters, numbers, watermark, signature, caption, font, typography";
 
+      // Call our API endpoint which proxies to Pollinations
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: combinedPrompt,
+          width: currentAspectRatio.width,
+          height: currentAspectRatio.height,
+          negativePrompt,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate image from API");
+      }
+
+      // Convert response blob to data URL
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
       setGeneratedImage(imageUrl);
-      setStatus("Loading generated image into the thumbnail preview...");
+      setStatus("Generated image loaded. Preview is ready.");
     } catch (error) {
+      console.error("Generation error:", error);
       setStatus(error instanceof Error ? error.message : "Unable to generate thumbnail.");
       setIsGenerating(false);
     }
